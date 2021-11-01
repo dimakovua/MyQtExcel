@@ -1,5 +1,52 @@
 #include "parser.h"
 #include <iostream>
+int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
+    if(number_of_iterations > 100){
+        std::cerr << "Wow! Infinite recursion\n";
+        return -2147483648;
+    }
+    number_of_iterations++;
+    QString line = item->text();
+    string line_str = line.toStdString();
+    string result;
+    for(int i = 0; i < line_str.length(); i++)
+    {
+        if(line_str[i] == ' ')
+        {
+            i--;
+        }
+        else if((int)line_str[i] <=71 && (int)line_str[i] >= 65)
+        {
+            int column_of_ref = (int)line_str[i]-65;
+            string row;
+            row +=line_str[i+1];
+            int row_of_ref =0;
+            try
+            {
+                row_of_ref= stoi(row) -1;
+            }
+            catch(invalid_argument)
+            {
+                std::cerr<<"Invalid argument\n";
+                QMessageBox::critical(table, "Error", "Invalid Argument");
+            }
+            QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
+            int value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
+            if(value_of_ref == -2147483648){
+                return -2147483648;
+            }
+            result+=to_string(value_of_ref);
+            i++;
+        }
+        else
+        {
+            result+= line_str[i];
+        }
+    }
+    return calculateExpression(result);
+}
+
+
 bool Parser::isInteger(const std::string & s)
 {
     if(s[0] == 'q') return true;
@@ -64,7 +111,7 @@ vector<string> Parser::parseExpression(const string& s) {
             result.push_back(tmp);
 
         }
-        else if(s[i] == 'm' || s[i] == 'd') { // значит текущее слово это min || max || mod || div
+        else if(s[i] == 'm' || s[i] == 'd') {
             string tmp(s.begin()+i, s.begin()+i+3);
             result.push_back(tmp);
             i+=2;
@@ -73,19 +120,14 @@ vector<string> Parser::parseExpression(const string& s) {
             if(to_reverse_next_number ==1){
                 resNumber+= 'q';
                 to_reverse_next_number = 0;
-            }//если цифра
+            }
             resNumber+=s[i];
         }
     }
     if(!resNumber.empty()) result.push_back(resNumber);
     return result;
 }
-//template<class T>
-//void printVector(const vector<T>& vec) {
-//    std::cout << '\n';
-//    for(const auto& itt: vec) std::cout << itt << " ";
-//    std::cout << '\n';
-//}
+
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
 double Parser::calculateExpression(const string& inputExpression) {
     vector<string> tokens = parseExpression(inputExpression);
@@ -104,29 +146,33 @@ double Parser::calculateExpression(const string& inputExpression) {
     operations["div"] = [](double a, double b) {return (int)a/(int)b;};
     operations["max"] = [](double a, double b) {return max(a,b);};
     operations["min"] = [](double a, double b) {return min(a,b);};
-    for(auto it: tokens) {
-        if(isInteger(it)) {
-            //std::cerr << "ABOBA\n";
+    for(auto it: tokens)
+    {
+        if(isInteger(it))
+        {
             string reverted;
-            //std::cerr << it[0] <<"\n";
-            if(it[0] == 'q'){
-                //std::cerr << "We are in if\n";
-                for(int i = 1; i < it.length(); i++){
+            if(it[0] == 'q')
+            {
+                for(int i = 1; i < it.length(); i++)
+                {
                     reverted+=it[i];
                 }
-                //std::cerr << reverted << "\n";
                 double num = (atof(reverted.c_str())*(-1));
-                //std::cerr << "New num = " << num << "\n";
                 numbersStack.push_back(num);
 
             }
-            else{
-            numbersStack.push_back(atof(it.c_str()));}
+            else
+            {
+            numbersStack.push_back(atof(it.c_str()));
+            }
         }
 
-else {
-            if(isOperation(it)) {
-                while(!operationsStack.empty() && priorities[operationsStack.back()] >= priorities[it]) {
+        else
+        {
+            if(isOperation(it))
+            {
+                while(!operationsStack.empty() && priorities[operationsStack.back()] >= priorities[it])
+                {
                     std::string OpBack = operationsStack.back();
                     int OpBackPrior = priorities[OpBack];
                     int itPrior = priorities[it];
@@ -142,8 +188,10 @@ else {
             }
             else if(it == "(") operationsStack.push_back(it);
 
-            else if(it == ")") {
-                while(operationsStack.back() != "(") {
+            else if(it == ")")
+            {
+                while(operationsStack.back() != "(")
+                {
                     double secondOperand = numbersStack.back();
                     numbersStack.pop_back();
                     double firstOperand = numbersStack.back();
@@ -153,23 +201,22 @@ else {
                 }
                 operationsStack.pop_back();
             }
-            else if(it == "X") {
-                //printVector(operationsStack);
-                //printVector(numbersStack);
-                //проверка на правильность арифметического выражения
-//                for(auto it: numbersStack) qDebug() << it << " ";
-//                qDebug() << '\n';
-//                for(auto it: operationsStack) std::cout << it << " ";
-//                qDebug() << '\n';
-                if(numbersStack.size() - operationsStack.size() == 1) { // должно быть так(наверное)
-                    while(!operationsStack.empty()) {
+            else if(it == "X")
+            {
+                if(numbersStack.size() - operationsStack.size() == 1)
+                {
+                    while(!operationsStack.empty())
+                    {
                         double secondOperand = numbersStack.back();
                         numbersStack.pop_back();
                         double firstOperand = numbersStack.back();
                         numbersStack.pop_back();
-                        try{
-                        numbersStack.push_back(operations[operationsStack.back()](firstOperand, secondOperand));}
-                        catch(const std::exception& ex){
+                        try
+                        {
+                        numbersStack.push_back(operations[operationsStack.back()](firstOperand, secondOperand));
+                        }
+                        catch(const std::exception& ex)
+                        {
                             std::cerr<<ex.what();
                         }
 
@@ -177,7 +224,8 @@ else {
                     }
                     return numbersStack.back();
                 }
-                else {
+                else
+                {
                     return -10000;
                 }
             }

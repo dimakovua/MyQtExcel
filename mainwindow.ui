@@ -177,7 +177,7 @@ QPushButton:default {
 }</string>
     </property>
     <property name="text">
-     <string>Set Aboba</string>
+     <string>Clear table</string>
     </property>
    </widget>
   </widget>
@@ -187,7 +187,7 @@ QPushButton:default {
      <x>0</x>
      <y>0</y>
      <width>737</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

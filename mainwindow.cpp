@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <parser.h>
 #include <iostream>
+//#include <bits/stdc++.h>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -39,45 +40,61 @@ void MainWindow::on_tableWidget_cellChanged(int row, int column)
 
 }
 
-int RecursiveRef(QTableWidgetItem* item, QTableWidget* table){
+int RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
+    if(number_of_iterations > 30){
+        std::cerr << "Wow! Infinite recursion\n";
+        return -2147483648;
+    }
+    number_of_iterations++;
     QString line = item->text();
     string line_str = line.toStdString();
-    std::cerr << "line_str = " << line_str << "\n";
+    //std::cerr << "line_str = " << line_str << "\n";
     string result;
-    std::cerr << "result = " << result << "\n";
+    //std::cerr << "result = " << result << "\n";
     for(int i = 0; i < line_str.length(); i++){
-        std::cerr << "i = " << i << "\n";
+        //std::cerr << "i = " << i << "\n";
         if(line_str[i] == ' '){
             i--;
         }
         else if((int)line_str[i] <=71 && (int)line_str[i] >= 65){
-            std::cerr << "line_str[i] " << line_str[i] << "\n";
+            //std::cerr << "line_str[i] " << line_str[i] << "\n";
             int column_of_ref = (int)line_str[i]-65;
-            std::cerr <<"column_of_ref = " << column_of_ref << "\n";
+            //std::cerr <<"column_of_ref = " << column_of_ref << "\n";
             string row;
             row +=line_str[i+1];
-            std::cerr << "string row: " << row << "\n";
-            int row_of_ref = stoi(row) -1;
-            std::cerr << "row_of_ref = " << row_of_ref << "\n";
-            QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
-            std::cerr << "We got new item with text: " << ref_item->text().toStdString() << "\n";
-            std::cerr << "Sending new item to new recursion..\n";
-            int value_of_ref = RecursiveRef(ref_item, table);
-            std::cerr <<"Got value_of_ref = "<<value_of_ref << "\n";
+            //std::cerr << "string row: " << row << "\n";
+
+                int row_of_ref =0;
+                try{
+                row_of_ref= stoi(row) -1;}
+                catch(invalid_argument){
+                    std::cerr<<"Invalid argument\n";
+                    QMessageBox::critical(table, "Error", "Invalid Argument");
+                }
+
+
+            //std::cerr << "row_of_ref = " << row_of_ref << "\n";
+                QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
+            //std::cerr << "We got new item with text: " << ref_item->text().toStdString() << "\n";
+            //std::cerr << "Sending new item to new recursion..\n";
+            int value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
+            if(value_of_ref == -2147483648){
+                return -2147483648;
+            }
+           // std::cerr <<"Got value_of_ref = "<<value_of_ref << "\n";
 
             result+=to_string(value_of_ref);
-            std::cerr << "New result: " << result << "\n";
+           // std::cerr << "New result: " << result << "\n";
             i++;
         }
         else{
-            std::cerr << "ELSE\n";
+           // std::cerr << "ELSE\n";
             result+= line_str[i];
-            std::cerr << "Else result: "<<result <<"\n";
+           // std::cerr << "Else result: "<<result <<"\n";
         }
     }
     Parser par;
     return par.calculateExpression(result);
-
 }
 void MainWindow::on_CalculateButton_clicked()
 {
@@ -96,8 +113,14 @@ void MainWindow::on_CalculateButton_clicked()
 
 //            }
 //        }
-        QString answer = QString::number(RecursiveRef(item, ui->tableWidget));
-        item->setText(answer);
+        int n = 0;
+        int res = RecursiveRef(item, ui->tableWidget, n);
+        if(res == -10000 || res == -2147483648){
+            QMessageBox::critical(this, "Error!", "Bad expression!");
+        }
+        else{
+        QString answer = QString::number(res);
+        item->setText(answer);}
 
 }
 

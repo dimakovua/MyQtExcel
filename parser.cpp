@@ -89,7 +89,8 @@ vector<string> Parser::parseExpression(const string& s) {
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
 double Parser::calculateExpression(const string& inputExpression) {
     vector<string> tokens = parseExpression(inputExpression);
-    //for(auto it: tokens) std::cerr << it << " ";
+    for(auto it: tokens) std::cerr << it << " ";
+    std::cerr<<"\n";
     tokens.emplace_back("X");
     vector<double> numbersStack;
     vector<string> operationsStack;
@@ -166,7 +167,12 @@ else {
                         numbersStack.pop_back();
                         double firstOperand = numbersStack.back();
                         numbersStack.pop_back();
-                        numbersStack.push_back(operations[operationsStack.back()](firstOperand, secondOperand));
+                        try{
+                        numbersStack.push_back(operations[operationsStack.back()](firstOperand, secondOperand));}
+                        catch(const std::exception& ex){
+                            std::cerr<<ex.what();
+                        }
+
                         operationsStack.pop_back();
                     }
                     return numbersStack.back();

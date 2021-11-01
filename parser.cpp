@@ -98,7 +98,7 @@ vector<string> Parser::parseExpression(const string& s) {
     bool to_reverse_next_number = 0;
     string resNumber;
     for(int i = 0; i < s.size(); ++i) {
-        if(s[i] == '-' && (i == 0 || s[i-1] == '(')){
+        if(s[i] == '-' && (i == 0 || s[i-1] == '(' || s[i-1] == '+'||s[i-1] == '/'||s[i-1] == '-'||s[i-1] == '*')){
                 to_reverse_next_number = 1;
         }
         else if(s[i] == ' ' || s[i] == '(' || s[i] == ')' || isOperation(s[i])) {
@@ -131,8 +131,8 @@ vector<string> Parser::parseExpression(const string& s) {
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
 double Parser::calculateExpression(const string& inputExpression) {
     vector<string> tokens = parseExpression(inputExpression);
-    for(auto it: tokens) std::cerr << it << " ";
-    std::cerr<<"\n";
+    //for(auto it: tokens) std::cerr << it << " ";
+    //std::cerr<<"\n";
     tokens.emplace_back("X");
     vector<double> numbersStack;
     vector<string> operationsStack;
@@ -140,7 +140,11 @@ double Parser::calculateExpression(const string& inputExpression) {
     operations["+"] = [](double a, double b) {return a+b;};
     operations["-"] = [](double a, double b) {return a-b;};
     operations["*"] = [](double a, double b) {return a*b;};
-    operations["/"] = [](double a, double b) {return a/b;};
+    operations["/"] = [](double a, double b) {
+        if(b != 0){
+        return a/b;}
+        else return -10000.0;
+    };
     operations["^"] = [](double a, double b) {return pow(a,b);};
     operations["mod"] = [](double a, double b) {return (int)a%(int)b;};
     operations["div"] = [](double a, double b) {return (int)a/(int)b;};

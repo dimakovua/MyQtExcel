@@ -15,7 +15,8 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    parser.h
+    parser.h \
+    test_runner.h
 
 FORMS += \
     mainwindow.ui

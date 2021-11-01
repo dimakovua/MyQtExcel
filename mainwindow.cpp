@@ -27,7 +27,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_helper_triggered()
 {
-    QMessageBox::about(this, "Helper", "I will write something here later(");
+    QMessageBox::about(this, "Helper", "Operators: + - / * ^ max min mod\n You can use references (A1+B2), but be carefull with cycled references)\n Type name of file and choose Save/Open\n by Dmytro Kovalenko");
 }
 
 
@@ -107,7 +107,7 @@ void MainWindow::on_OpenFile_clicked()
     }
     else{
         getline(in, data);
-        std::cerr << data;
+        //std::cerr << data;
         vector<string> data_splitted;
         string word;
         for(int i =0; i < data.length(); i++){
@@ -120,9 +120,9 @@ void MainWindow::on_OpenFile_clicked()
             }
         }
         int d = 0;
-        for(auto aa : data_splitted){
-            std::cerr << aa;
-        }
+//        for(auto aa : data_splitted){
+//            std::cerr << aa;
+//        }
         for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
                 for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
                     QTableWidgetItem* itm = new QTableWidgetItem(QString::fromStdString(data_splitted[d]));

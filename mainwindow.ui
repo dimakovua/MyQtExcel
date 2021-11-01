@@ -268,16 +268,7 @@ QPushButton:default {
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_File"/>
-    <addaction name="actionSave_File"/>
     <addaction name="actionQuit"/>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-    <addaction name="actionAdd_column"/>
-    <addaction name="actionAdd_row"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -286,7 +277,6 @@ QPushButton:default {
     <addaction name="actionOpen_helper"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

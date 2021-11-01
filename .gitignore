@@ -9,6 +9,7 @@
 *.o
 *.obj
 *.orig
+*.txt
 *.rej
 *.so
 *.so.*
@@ -58,7 +59,7 @@ Thumbs.db
 *.opensdf
 *.vcxproj
 *vcxproj.*
-
+build
 # MinGW generated files
 *.Debug
 *.Release

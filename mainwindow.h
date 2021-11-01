@@ -26,6 +26,10 @@ private slots:
 
     void on_SetAboba_clicked();
 
+    void on_SaveFile_clicked();
+
+    void on_OpenFile_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

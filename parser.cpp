@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <iostream>
 int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
+    std::cerr << "rec started\n";
     if(number_of_iterations > 100){
         std::cerr << "Wow! Infinite recursion\n";
         return -2147483648;
@@ -12,21 +13,29 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
     QString line = item->text();
     string line_str = line.toStdString();
     string result;
+    std::cerr << "\nline_str " << line_str << "\n";
+
     for(int i = 0; i < line_str.length(); i++)
     {
-        if(line_str[i] == ' ')
+        std::cerr << "cycle started\n";
+//        if(line_str[i] == ' ')
+//        {
+//            i--;
+//        }
+        if((int)line_str[i] >= 65 && (int)line_str[i] <=71)
         {
-            i--;
-        }
-        else if((int)line_str[i] <=71 && (int)line_str[i] >= 65)
-        {
+            std::cerr << "we are herre!\n";
             int column_of_ref = (int)line_str[i]-65;
+
             string row;
             row +=line_str[i+1];
             int row_of_ref =0;
             try
             {
                 row_of_ref= stoi(row) -1;
+                if(row_of_ref >= table->rowCount()){
+                    throw std::invalid_argument("Out of range");
+                }
             }
             catch(invalid_argument)
             {
@@ -43,9 +52,11 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
         }
         else
         {
+            std::cerr << "else\n";
             result+= line_str[i];
         }
     }
+    std::cerr << "Result to calculate: " << result;
     return calculateExpression(result);
 }
 
@@ -134,8 +145,8 @@ vector<string> Parser::parseExpression(const string& s) {
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
 double Parser::calculateExpression(const string& inputExpression) {
     vector<string> tokens = parseExpression(inputExpression);
-    //for(auto it: tokens) std::cerr << it << " ";
-    //std::cerr<<"\n";
+    for(auto it: tokens) std::cerr << it << " ";
+    std::cerr<<"\n";
     tokens.emplace_back("X");
     vector<double> numbersStack;
     vector<string> operationsStack;

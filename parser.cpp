@@ -13,18 +13,18 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
     QString line = item->text();
     string line_str = line.toStdString();
     string result;
-    std::cerr << "\nline_str " << line_str << "\n";
+    //std::cerr << "\nline_str " << line_str << "\n";
 
     for(int i = 0; i < line_str.length(); i++)
     {
-        std::cerr << "cycle started\n";
+       // std::cerr << "cycle started\n";
 //        if(line_str[i] == ' ')
 //        {
 //            i--;
 //        }
         if((int)line_str[i] >= 65 && (int)line_str[i] <=71)
         {
-            std::cerr << "we are herre!\n";
+          //  std::cerr << "we are herre!\n";
             int column_of_ref = (int)line_str[i]-65;
 
             string row;
@@ -52,11 +52,11 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
         }
         else
         {
-            std::cerr << "else\n";
+            //std::cerr << "else\n";
             result+= line_str[i];
         }
     }
-    std::cerr << "Result to calculate: " << result;
+    //std::cerr << "Result to calculate: " << result;
     return calculateExpression(result);
 }
 
@@ -145,8 +145,8 @@ vector<string> Parser::parseExpression(const string& s) {
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
 double Parser::calculateExpression(const string& inputExpression) {
     vector<string> tokens = parseExpression(inputExpression);
-    for(auto it: tokens) std::cerr << it << " ";
-    std::cerr<<"\n";
+    //for(auto it: tokens) std::cerr << it << " ";
+    //std::cerr<<"\n";
     tokens.emplace_back("X");
     vector<double> numbersStack;
     vector<string> operationsStack;
@@ -160,8 +160,23 @@ double Parser::calculateExpression(const string& inputExpression) {
         else return -10000.0;
     };
     operations["^"] = [](double a, double b) {return pow(a,b);};
-    operations["mod"] = [](double a, double b) {return (int)a%(int)b;};
-    operations["div"] = [](double a, double b) {return (int)a/(int)b;};
+    operations["mod"] = [](double a, double b) {
+        if (b == 0){
+            return -10000;
+        }
+        try{
+        int res = (int)a%(int)b;
+        return res;}
+        catch(const std::exception& ex){
+            return -10000;
+        }
+    };
+    operations["div"] = [](double a, double b) {
+        if(b == 0){
+            return -10000;
+        }
+        return (int)a/(int)b;
+    };
     operations["max"] = [](double a, double b) {return max(a,b);};
     operations["min"] = [](double a, double b) {return min(a,b);};
     for(auto it: tokens)
@@ -197,7 +212,16 @@ double Parser::calculateExpression(const string& inputExpression) {
                     if(operationsStack.back() == "(" || operationsStack.back() == ")") break;
                     double secondOperand = numbersStack.back();
                     numbersStack.pop_back();
-                    double firstOperand = numbersStack.back();
+                    double firstOperand;
+                    try{
+                        if(numbersStack.size() == 1 && (it == "mod" || it == "div" || it == "*" || it == "/" || it == "^")){
+                            throw std::invalid_argument("one argument only!");
+                        }
+                        firstOperand = numbersStack.back();}
+                    catch(const invalid_argument ex){
+                        return -10000;
+                    }
+
                     numbersStack.pop_back();
                     numbersStack.push_back(operations[operationsStack.back()](firstOperand, secondOperand));
                     operationsStack.pop_back();

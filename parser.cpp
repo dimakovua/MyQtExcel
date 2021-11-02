@@ -5,6 +5,9 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
         std::cerr << "Wow! Infinite recursion\n";
         return -2147483648;
     }
+    if(item->text() == " "){
+        return -2147483648;
+    }
     number_of_iterations++;
     QString line = item->text();
     string line_str = line.toStdString();

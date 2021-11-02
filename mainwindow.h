@@ -1,8 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
 #include <QMainWindow>
 #include <QTabWidget>
+#include <vector>
+#include <QPixmap>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -31,6 +32,8 @@ private slots:
     void on_OpenFile_clicked();
 
 private:
+    void changePic();
+    std::vector<QPixmap> pixes;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

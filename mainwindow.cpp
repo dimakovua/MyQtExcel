@@ -53,7 +53,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionOpen_helper_triggered()
 {
     changePic();
-    QMessageBox::about(this, "Helper", "Operators: + - / * ^ max min mod\n You can use references (A1+B2), but be carefull with cycled references)\n Type name of file and choose Save/Open\n by Dmytro Kovalenko");
+    QMessageBox::about(this, "Helper", "Operators: + - / * ^ max min mod\nYou can use references (A1+B2), but be carefull with cycled references)\nType name of file and choose Save/Open\nby Dmytro Kovalenko");
 }
 
 
@@ -134,7 +134,7 @@ void MainWindow::on_OpenFile_clicked()
     string data;
     string file_path = "/Users/dmitrikovalenko/MyExcel/";
     ifstream in;
-    if(ui->file_name->text() == "!="){
+    if(ui->file_name->text() != ""){
     file_path += ui->file_name->text().toStdString();
 
     in.open(file_path);}

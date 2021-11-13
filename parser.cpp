@@ -2,14 +2,16 @@
 #include <iostream>
 #include <sstream>
 #include<iomanip>
+
+
 double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
     std::cerr << "rec started\n";
     if(number_of_iterations > 100){
         std::cerr << "Wow! Infinite recursion\n";
-        return -2147483648;
+        return CODE_NUMBER_FOR_BAD_EXPRESSION;
     }
     if(item->text() == " "){
-        return -2147483648;
+        return CODE_NUMBER_FOR_BAD_EXPRESSION;
     }
     number_of_iterations++;
     QString line = item->text();
@@ -47,8 +49,8 @@ double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& num
             }
             QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
             double value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
-            if(value_of_ref == -2147483648){
-                return -2147483648;
+            if(value_of_ref == CODE_NUMBER_FOR_BAD_EXPRESSION){
+                return CODE_NUMBER_FOR_BAD_EXPRESSION;
             }
             result+=to_string(value_of_ref);
             i++;
@@ -61,7 +63,7 @@ double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& num
     }
    // std::cerr << "Result to calculate: " << result;
 
-    double calculatedExpression = calculateExpression(result);
+    double calculatedExpression = calculateExpression(table, result);
     cerr << "calculateExpression = " << fixed << setprecision(2) << calculatedExpression;
     cerr << '\n';
     return calculatedExpression;
@@ -117,6 +119,7 @@ std::vector<std::string> Parser::splitString(const std::string &str) {
 
 vector<string> Parser::parseExpression(const string& s) {
     vector<string> result;
+   // result.push_back("(");
     bool to_reverse_next_number = 0;
     string resNumber;
     for(int i = 0; i < s.size(); ++i) {
@@ -151,11 +154,16 @@ vector<string> Parser::parseExpression(const string& s) {
         }
     }
     if(!resNumber.empty()) result.push_back(resNumber);
+
+    //result.push_back(")");
     return result;
 }
 
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
-double Parser::calculateExpression(const string& inputExpression) {
+double Parser::calculateExpression(QTableWidget* table, const string& inputExpression) {
+
+    auto functionForBadExpression = [table](){QMessageBox::critical(table, "Error", "Invalid Argument");};
+
     vector<string> tokens = parseExpression(inputExpression);
     //for(auto it: tokens) std::cerr << it << " ";
     //std::cerr<<"\n";
@@ -225,7 +233,7 @@ double Parser::calculateExpression(const string& inputExpression) {
                         }
                         firstOperand = numbersStack.back();}
                     catch(const invalid_argument ex){
-                        return -10000;
+                        return CODE_NUMBER_FOR_BAD_EXPRESSION;
                     }
 
                     numbersStack.pop_back();
@@ -238,8 +246,10 @@ double Parser::calculateExpression(const string& inputExpression) {
 
             else if(it == ")")
             {
+                if(numbersStack.empty()) {return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                 while(operationsStack.back() != "(")
                 {
+                    if(numbersStack.size() < 2) {return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                     double secondOperand = numbersStack.back();
                     numbersStack.pop_back();
                     double firstOperand = numbersStack.back();
@@ -270,11 +280,12 @@ double Parser::calculateExpression(const string& inputExpression) {
 
                         operationsStack.pop_back();
                     }
+                    if(numbersStack.empty()) {functionForBadExpression(); return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                     return numbersStack.back();
                 }
                 else
                 {
-                    return -10000;
+                    return CODE_NUMBER_FOR_BAD_EXPRESSION;
                 }
             }
         }

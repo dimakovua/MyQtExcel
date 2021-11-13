@@ -7,6 +7,8 @@
 #include <vector>
 #include  <random>
 #include  <iterator>
+
+
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
     std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
@@ -76,7 +78,7 @@ void MainWindow::on_CalculateButton_clicked()
     QTableWidgetItem* item = ui->tableWidget->currentItem();
     int n = 0;
     double res = p.RecursiveRef(item, ui->tableWidget, n);
-    if(res == -10000 || res == -2147483648)
+    if(res == CODE_NUMBER_FOR_BAD_EXPRESSION)
     {
         QMessageBox::critical(this, "Error!", "Bad expression!");
     }

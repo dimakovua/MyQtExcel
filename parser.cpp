@@ -1,6 +1,6 @@
 #include "parser.h"
 #include <iostream>
-int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
+double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
     std::cerr << "rec started\n";
     if(number_of_iterations > 100){
         std::cerr << "Wow! Infinite recursion\n";
@@ -43,7 +43,7 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
                 QMessageBox::critical(table, "Error", "Invalid Argument");
             }
             QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
-            int value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
+            double value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
             if(value_of_ref == -2147483648){
                 return -2147483648;
             }
@@ -56,7 +56,7 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
             result+= line_str[i];
         }
     }
-    //std::cerr << "Result to calculate: " << result;
+    std::cerr << "Result to calculate: " << result;
     return calculateExpression(result);
 }
 
@@ -155,30 +155,24 @@ double Parser::calculateExpression(const string& inputExpression) {
     operations["-"] = [](double a, double b) {return a-b;};
     operations["*"] = [](double a, double b) {return a*b;};
     operations["/"] = [](double a, double b) {
-        if(b != 0){
-        return a/b;}
-        else return -10000.0;
+        if(b == 0) throw ("division by zero!");
+        return a/b;
     };
     operations["^"] = [](double a, double b) {return pow(a,b);};
     operations["mod"] = [](double a, double b) {
-        if (b == 0){
-            return -10000;
-        }
-        try{
-        int res = (int)a%(int)b;
-        return res;}
-        catch(const std::exception& ex){
-            return -10000;
-        }
+        if (b == 0) throw "division by zero!";
+        return (int)a%(int)b;
     };
+
     operations["div"] = [](double a, double b) {
-        if(b == 0){
-            return -10000;
-        }
+        if(b == 0) throw ("division by zero!");
         return (int)a/(int)b;
     };
     operations["max"] = [](double a, double b) {return max(a,b);};
     operations["min"] = [](double a, double b) {return min(a,b);};
+
+    for(auto it: tokens) cerr << it << " ";
+    std::cerr << '\n';
     for(auto it: tokens)
     {
         if(isInteger(it))

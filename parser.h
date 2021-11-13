@@ -12,7 +12,7 @@
 using namespace std;
 class Parser {
 public:
-    int RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations);
+    double RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations);
     bool isInteger(const std::string & s);
     bool isDigit(char a);
     bool isOperation(const string& s);

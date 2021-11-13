@@ -20,7 +20,6 @@ Iter select_randomly(Iter start, Iter end) {
     static std::mt19937 gen(rd());
     return select_randomly(start, end, gen);
 }
-//#include <bits/stdc++.h>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -76,7 +75,7 @@ void MainWindow::on_CalculateButton_clicked()
     Parser p;
     QTableWidgetItem* item = ui->tableWidget->currentItem();
     int n = 0;
-    int res = p.RecursiveRef(item, ui->tableWidget, n);
+    double res = p.RecursiveRef(item, ui->tableWidget, n);
     if(res == -10000 || res == -2147483648)
     {
         QMessageBox::critical(this, "Error!", "Bad expression!");

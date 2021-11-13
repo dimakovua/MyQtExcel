@@ -14,7 +14,7 @@
 
 
 
-#define CODE_NUMBER_FOR_BAD_EXPRESSION -2147483648
+#define CODE_NUMBER_FOR_BAD_EXPRESSION -2147483648.0
 
 
 
@@ -29,7 +29,7 @@ public:
     std::vector<std::string> splitString(const std::string &str);
     vector<string> parseExpression(const string& s);
     vector<string> findRef(const string& s);
-    double calculateExpression(QTableWidget* table, const string& inputExpression);
+    double calculateExpression(const string& inputExpression);
 private:
     map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
 };

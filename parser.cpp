@@ -63,7 +63,7 @@ double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& num
     }
    // std::cerr << "Result to calculate: " << result;
 
-    double calculatedExpression = calculateExpression(table, result);
+    double calculatedExpression = calculateExpression(result);
     cerr << "calculateExpression = " << fixed << setprecision(2) << calculatedExpression;
     cerr << '\n';
     return calculatedExpression;
@@ -160,9 +160,9 @@ vector<string> Parser::parseExpression(const string& s) {
 }
 
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
-double Parser::calculateExpression(QTableWidget* table, const string& inputExpression) {
+double Parser::calculateExpression(const string& inputExpression) {
 
-    auto functionForBadExpression = [table](){QMessageBox::critical(table, "Error", "Invalid Argument");};
+    //auto functionForBadExpression = [table](){QMessageBox::critical(table, "Error", "Invalid Argument");};
 
     vector<string> tokens = parseExpression(inputExpression);
     //for(auto it: tokens) std::cerr << it << " ";
@@ -175,24 +175,24 @@ double Parser::calculateExpression(QTableWidget* table, const string& inputExpre
     operations["-"] = [](double a, double b) {return a-b;};
     operations["*"] = [](double a, double b) {return a*b;};
     operations["/"] = [](double a, double b) {
-        if(b == 0) throw ("division by zero!");
+        if(b == 0){ return CODE_NUMBER_FOR_BAD_EXPRESSION;}
         return a/b;
     };
     operations["^"] = [](double a, double b) {return pow(a,b);};
     operations["mod"] = [](double a, double b) {
-        if (b == 0) throw "division by zero!";
+        if (b == 0){return (int)CODE_NUMBER_FOR_BAD_EXPRESSION;}
         return (int)a%(int)b;
     };
 
     operations["div"] = [](double a, double b) {
-        if(b == 0) throw ("division by zero!");
+        if(b == 0) {return (int)CODE_NUMBER_FOR_BAD_EXPRESSION;}
         return (int)a/(int)b;
     };
     operations["max"] = [](double a, double b) {return max(a,b);};
     operations["min"] = [](double a, double b) {return min(a,b);};
-    cerr << "tokens:\n";
-    for(auto it: tokens) cerr << it << " ";
-    std::cerr << '\n';
+    //cerr << "tokens:\n";
+    //for(auto it: tokens) cerr << it << " ";
+    //std::cerr << '\n';
     for(auto it: tokens)
     {
         if(isInteger(it))
@@ -227,14 +227,15 @@ double Parser::calculateExpression(QTableWidget* table, const string& inputExpre
                     double secondOperand = numbersStack.back();
                     numbersStack.pop_back();
                     double firstOperand;
-                    try{
-                        if(numbersStack.size() == 1 && (it == "mod" || it == "div" || it == "*" || it == "/" || it == "^")){
-                            throw std::invalid_argument("one argument only!");
-                        }
-                        firstOperand = numbersStack.back();}
-                    catch(const invalid_argument ex){
-                        return CODE_NUMBER_FOR_BAD_EXPRESSION;
-                    }
+                    firstOperand = numbersStack.back();
+//                    try{
+//                        if(numbersStack.size() == 1 && (it == "mod" || it == "div" || it == "*" || it == "/" || it == "^")){
+//                            throw std::invalid_argument("one argument only!");
+//                        }
+//                        firstOperand = numbersStack.back();}
+//                    catch(const invalid_argument ex){
+//                        return CODE_NUMBER_FOR_BAD_EXPRESSION;
+//                    }
 
                     numbersStack.pop_back();
                     numbersStack.push_back(operations[operationsStack.back()](firstOperand, secondOperand));
@@ -280,7 +281,7 @@ double Parser::calculateExpression(QTableWidget* table, const string& inputExpre
 
                         operationsStack.pop_back();
                     }
-                    if(numbersStack.empty()) {functionForBadExpression(); return CODE_NUMBER_FOR_BAD_EXPRESSION;}
+                    if(numbersStack.empty()) {return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                     return numbersStack.back();
                 }
                 else

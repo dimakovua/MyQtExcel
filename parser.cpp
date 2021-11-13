@@ -1,16 +1,21 @@
 #include "parser.h"
 #include <iostream>
-int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
+#include <sstream>
+#include<iomanip>
+
+
+double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
     std::cerr << "rec started\n";
     if(number_of_iterations > 100){
         std::cerr << "Wow! Infinite recursion\n";
-        return -2147483648;
+        return CODE_NUMBER_FOR_BAD_EXPRESSION;
     }
     if(item->text() == " "){
-        return -2147483648;
+        return CODE_NUMBER_FOR_BAD_EXPRESSION;
     }
     number_of_iterations++;
     QString line = item->text();
+    cerr << "line from cell: " << line.toStdString() << '\n';
     string line_str = line.toStdString();
     string result;
     //std::cerr << "\nline_str " << line_str << "\n";
@@ -43,9 +48,9 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
                 QMessageBox::critical(table, "Error", "Invalid Argument");
             }
             QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
-            int value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
-            if(value_of_ref == -2147483648){
-                return -2147483648;
+            double value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
+            if(value_of_ref == CODE_NUMBER_FOR_BAD_EXPRESSION){
+                return CODE_NUMBER_FOR_BAD_EXPRESSION;
             }
             result+=to_string(value_of_ref);
             i++;
@@ -56,21 +61,34 @@ int Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number
             result+= line_str[i];
         }
     }
-    //std::cerr << "Result to calculate: " << result;
-    return calculateExpression(result);
+   // std::cerr << "Result to calculate: " << result;
+
+    double calculatedExpression = calculateExpression(table, result);
+    cerr << "calculateExpression = " << fixed << setprecision(2) << calculatedExpression;
+    cerr << '\n';
+    return calculatedExpression;
 }
 
 
 bool Parser::isInteger(const std::string & s)
 {
     if(s[0] == 'q') return true;
-    if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))) return false;
 
 
-    char * p;
-    strtol(s.c_str(), &p, 10);
+    auto result = double();
+   auto i = std::istringstream(s);
 
-    return (*p == 0);
+   i >> result;
+
+   return !i.fail() && i.eof();
+//    if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))) return false;
+
+
+//    char * p;
+//    strtod(s.c_str(), &p);
+
+//    if(*p == 0) cerr << s << "is double\n";
+//    return (*p == 0);
 }
 
 bool Parser::isDigit(char a) {
@@ -98,17 +116,10 @@ std::vector<std::string> Parser::splitString(const std::string &str) {
     result.push_back(word);
     return result;
 }
-vector<string> findRef(const string &s){
-    string beforeRef;
-    for(int i = 0; i < s.length(); i++){
-        if((int)s[i] <= 71 && (int)s[i] >= 65){
-
-        }
-    }
-}
 
 vector<string> Parser::parseExpression(const string& s) {
     vector<string> result;
+   // result.push_back("(");
     bool to_reverse_next_number = 0;
     string resNumber;
     for(int i = 0; i < s.size(); ++i) {
@@ -137,13 +148,22 @@ vector<string> Parser::parseExpression(const string& s) {
             }
             resNumber+=s[i];
         }
+        if(resNumber.back() == ',') {
+            resNumber.pop_back();
+            resNumber.push_back('.');
+        }
     }
     if(!resNumber.empty()) result.push_back(resNumber);
+
+    //result.push_back(")");
     return result;
 }
 
 map<string, int> priorities = {{"+", 1},{"-", 1},{"*", 2},{"/", 2},{"^", 3} ,{"mod", 2}, {"div", 2}};
-double Parser::calculateExpression(const string& inputExpression) {
+double Parser::calculateExpression(QTableWidget* table, const string& inputExpression) {
+
+    auto functionForBadExpression = [table](){QMessageBox::critical(table, "Error", "Invalid Argument");};
+
     vector<string> tokens = parseExpression(inputExpression);
     //for(auto it: tokens) std::cerr << it << " ";
     //std::cerr<<"\n";
@@ -155,30 +175,24 @@ double Parser::calculateExpression(const string& inputExpression) {
     operations["-"] = [](double a, double b) {return a-b;};
     operations["*"] = [](double a, double b) {return a*b;};
     operations["/"] = [](double a, double b) {
-        if(b != 0){
-        return a/b;}
-        else return -10000.0;
+        if(b == 0) throw ("division by zero!");
+        return a/b;
     };
     operations["^"] = [](double a, double b) {return pow(a,b);};
     operations["mod"] = [](double a, double b) {
-        if (b == 0){
-            return -10000;
-        }
-        try{
-        int res = (int)a%(int)b;
-        return res;}
-        catch(const std::exception& ex){
-            return -10000;
-        }
+        if (b == 0) throw "division by zero!";
+        return (int)a%(int)b;
     };
+
     operations["div"] = [](double a, double b) {
-        if(b == 0){
-            return -10000;
-        }
+        if(b == 0) throw ("division by zero!");
         return (int)a/(int)b;
     };
     operations["max"] = [](double a, double b) {return max(a,b);};
     operations["min"] = [](double a, double b) {return min(a,b);};
+    cerr << "tokens:\n";
+    for(auto it: tokens) cerr << it << " ";
+    std::cerr << '\n';
     for(auto it: tokens)
     {
         if(isInteger(it))
@@ -196,7 +210,7 @@ double Parser::calculateExpression(const string& inputExpression) {
             }
             else
             {
-            numbersStack.push_back(atof(it.c_str()));
+                numbersStack.push_back(atof(it.c_str()));
             }
         }
 
@@ -219,7 +233,7 @@ double Parser::calculateExpression(const string& inputExpression) {
                         }
                         firstOperand = numbersStack.back();}
                     catch(const invalid_argument ex){
-                        return -10000;
+                        return CODE_NUMBER_FOR_BAD_EXPRESSION;
                     }
 
                     numbersStack.pop_back();
@@ -232,8 +246,10 @@ double Parser::calculateExpression(const string& inputExpression) {
 
             else if(it == ")")
             {
+                if(numbersStack.empty()) {return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                 while(operationsStack.back() != "(")
                 {
+                    if(numbersStack.size() < 2) {return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                     double secondOperand = numbersStack.back();
                     numbersStack.pop_back();
                     double firstOperand = numbersStack.back();
@@ -264,11 +280,12 @@ double Parser::calculateExpression(const string& inputExpression) {
 
                         operationsStack.pop_back();
                     }
+                    if(numbersStack.empty()) {functionForBadExpression(); return CODE_NUMBER_FOR_BAD_EXPRESSION;}
                     return numbersStack.back();
                 }
                 else
                 {
-                    return -10000;
+                    return CODE_NUMBER_FOR_BAD_EXPRESSION;
                 }
             }
         }

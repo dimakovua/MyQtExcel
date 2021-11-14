@@ -40,6 +40,8 @@ private slots:
 
     void on_tableWidget_cellDoubleClicked(int row, int column);
 
+    void on_lineEdit_textEdited(const QString &arg1);
+
 private:
     void ShowText(int row, int column);
     void UpdateText(int row, int column);

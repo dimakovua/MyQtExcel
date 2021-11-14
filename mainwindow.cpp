@@ -104,7 +104,7 @@ void MainWindow::on_CalculateButton_clicked()
 
 
     p.clearEntranceTable();
-    double res = p.RecursiveRef(item, ui->tableWidget, n);
+    double res = p.RecursiveRef(this, item, ui->tableWidget, n);
     cerr << fixed << res << '\n';
     if(res == CODE_NUMBER_FOR_CYCLE) {
         QMessageBox::critical(this, "Error!", "Cycle!");
@@ -153,7 +153,9 @@ void MainWindow::on_SaveFile_clicked()
     }
     out.close();
 }
-
+QString MainWindow::GetExpr(int row, int col){
+    return expressions[row][col];
+}
 void MainWindow::changePic(){
     ui->label->setPixmap(*select_randomly(pixes.begin(), pixes.end()));
     ui->label->show();

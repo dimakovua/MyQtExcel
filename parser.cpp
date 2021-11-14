@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include<iomanip>
-
+#include<mainwindow.h>
 string getItemCoordinates(QTableWidgetItem* item) {
     string result;
     char letter = item->column()+ 65;
@@ -16,7 +16,7 @@ int hashOfString(string cellCoordinate) {
     int p = 7;
     return (int)(pow(cellCoordinate[0], p) + pow(cellCoordinate[1], p)) % MOD;
 }
-double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
+double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
     std::cerr << "rec started\n";
     if(item->text() == " "){
         return CODE_NUMBER_FOR_BAD_EXPRESSION;
@@ -27,8 +27,7 @@ double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& num
     string thisCellCoordinate = getItemCoordinates(item);
 
     number_of_iterations++;
-    QString line = item->text();
-
+    QString line = MainWindow->GetExpr(item->row(), item->column());
     string line_str = line.toStdString();
     string result;
 
@@ -63,7 +62,7 @@ double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& num
             QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
 
 
-            double value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
+            double value_of_ref = RecursiveRef(MainWindow, ref_item, table, number_of_iterations);
 
             if(value_of_ref == CODE_NUMBER_FOR_CYCLE){
                 return CODE_NUMBER_FOR_CYCLE;

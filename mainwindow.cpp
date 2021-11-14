@@ -96,6 +96,8 @@ void MainWindow::ChangeExpressions(){
 }
 void MainWindow::on_CalculateButton_clicked()
 {
+    changed_by_hands.first = -1;
+    changed_by_hands.second = -1;
     changePic();
     Parser p;
     QTableWidgetItem* item = ui->tableWidget->currentItem();
@@ -111,16 +113,19 @@ void MainWindow::on_CalculateButton_clicked()
         item->setText(answer);
     }
 }
-
-void MainWindow::on_SetAboba_clicked()
-{
-    changePic();
+void MainWindow::CleanTable(){
     for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
             for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
                 QTableWidgetItem* itm = new QTableWidgetItem(" ");
                 ui->tableWidget->setItem(i, j, itm);
             }
     }
+    ChangeExpressions();
+}
+void MainWindow::on_SetAboba_clicked()
+{
+    CleanTable();
+    changePic();
 }
 
 void MainWindow::on_SaveFile_clicked()
@@ -136,7 +141,8 @@ void MainWindow::on_SaveFile_clicked()
     for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
             for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
                 std::cerr << ui->tableWidget->item(i, j)->text().toStdString() << "|";
-                out << ui->tableWidget->item(i, j)->text().toStdString() << "|";
+                //out << ui->tableWidget->item(i, j)->text().toStdString() << "|";
+                out << expressions[i][j].toStdString() << "|";
             }
     }
     out.close();
@@ -149,6 +155,7 @@ void MainWindow::changePic(){
 void MainWindow::on_OpenFile_clicked()
 {
     changePic();
+    CleanTable();
     string data;
     string file_path = "/Users/dmitrikovalenko/MyExcel/";
     ifstream in;
@@ -199,7 +206,7 @@ void MainWindow::ShowText(int row, int column){
 }
 
 
-void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
+void MainWindow::on_tableWidget_cellPressed(int row, int column)
 {
     is_double_clicked = 1;
     changed_by_hands.first = row;

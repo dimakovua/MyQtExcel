@@ -38,11 +38,12 @@ private slots:
 
     void on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
 
-    void on_tableWidget_cellDoubleClicked(int row, int column);
+    void on_tableWidget_cellPressed(int row, int column);
 
     void on_lineEdit_textEdited(const QString &arg1);
 
 private:
+    void CleanTable();
     void ShowText(int row, int column);
     void UpdateText(int row, int column);
     void ChangeExpressions();

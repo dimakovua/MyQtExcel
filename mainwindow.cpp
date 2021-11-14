@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
                 ui->tableWidget->setItem(i, j, itm);
             }
     }
+    ChangeExpressions();
     QLabel label;
     QPixmap pix("/Users/dmitrikovalenko/MyExcel/Pics/dog.png");
     QPixmap pix2("/Users/dmitrikovalenko/MyExcel/Pics/frog.png");
@@ -43,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label->show();
     QTableWidgetItem* cur = ui->tableWidget->item(0,0);
     ui->tableWidget->setCurrentItem(cur);
+    std::cout << "Constructor done";
 }
 
 MainWindow::~MainWindow()
@@ -66,16 +68,41 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_tableWidget_cellChanged(int row, int column)
 {
-
+    if(is_double_clicked){
+        UpdateText(row, column);
+        //is_double_clicked = 0;
+    }
+    //ChangeExpressions();
 }
-
-
+void MainWindow::UpdateText(int row, int column){
+    if(row == changed_by_hands.first && column == changed_by_hands.second){
+        std::cout << "UpdateText! " << changed_by_hands.first << " " << changed_by_hands.second << "\n";
+        expressions[row][column] = ui->tableWidget->item(row, column)->text();
+        changed_by_hands.first = -1;
+        changed_by_hands.second = -1;
+    }
+}
+void MainWindow::ChangeExpressions(){
+    std::cout <<"Change Expression!\n";
+    int i = ui->tableWidget->rowCount();
+    int j = ui->tableWidget->columnCount();
+    std::cout << "i = " <<i << " j = " << j << "\n";
+    expressions.resize(i, vector<QString>(j));
+    for(int a = 0; a < i; a++){
+        for(int b = 0; b < j; b++){
+            expressions[a][b] = ui->tableWidget->item(a, b)->text();
+        }
+    }
+}
 void MainWindow::on_CalculateButton_clicked()
 {
 
     changePic();
     Parser p;
     QTableWidgetItem* item = ui->tableWidget->currentItem();
+    int row = item->row();
+    int col = item->column();
+    QString expr = item->text();
     int n = 0;
     double res = p.RecursiveRef(item, ui->tableWidget, n);
     if(res == CODE_NUMBER_FOR_BAD_EXPRESSION)
@@ -86,6 +113,7 @@ void MainWindow::on_CalculateButton_clicked()
     {
         QString answer = QString::number(res);
         item->setText(answer);
+        //expressions[row][col] = expr;
     }
 }
 
@@ -168,5 +196,27 @@ void MainWindow::on_OpenFile_clicked()
                 }
         }
     }
+}
+
+
+void MainWindow::on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+    //ChangeExpressions();
+    //std::cout << "new row: " << currentRow << " new col: " << currentColumn << "\n";
+    ShowText(currentRow, currentColumn);
+}
+void MainWindow::ShowText(int row, int column){
+    ui->lineEdit->setText(expressions[row][column]);
+}
+
+
+void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
+{
+    is_double_clicked = 1;
+    changed_by_hands.first = row;
+    changed_by_hands.second = column;
+    std::cout << "Is double clicked\n";
+    std::cout << "Double clicked on " << changed_by_hands.first << " " << changed_by_hands.second << std::endl;
+
 }
 

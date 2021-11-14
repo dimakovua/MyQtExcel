@@ -15,6 +15,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QString GetExpr(int row, int col);
 private slots:
     void on_actionOpen_helper_triggered();
 
@@ -41,7 +42,6 @@ private slots:
     void on_tableWidget_cellPressed(int row, int column);
 
     void on_lineEdit_textEdited(const QString &arg1);
-
 private:
     void CleanTable();
     void ShowText(int row, int column);

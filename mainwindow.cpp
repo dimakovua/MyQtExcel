@@ -8,7 +8,6 @@
 #include  <random>
 #include  <iterator>
 
-
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
     std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
@@ -102,8 +101,15 @@ void MainWindow::on_CalculateButton_clicked()
     Parser p;
     QTableWidgetItem* item = ui->tableWidget->currentItem();
     int n = 0;
+
+
+    p.clearEntranceTable();
     double res = p.RecursiveRef(item, ui->tableWidget, n);
-    if(res == CODE_NUMBER_FOR_BAD_EXPRESSION)
+    cerr << fixed << res << '\n';
+    if(res == CODE_NUMBER_FOR_CYCLE) {
+        QMessageBox::critical(this, "Error!", "Cycle!");
+    }
+    else if(res == CODE_NUMBER_FOR_BAD_EXPRESSION)
     {
         QMessageBox::critical(this, "Error!", "Bad expression!");
     }

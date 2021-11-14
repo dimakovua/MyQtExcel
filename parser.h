@@ -13,7 +13,6 @@
 #include <QMessageBox>
 
 
-
 #define CODE_NUMBER_FOR_BAD_EXPRESSION -2147483648.0
 
 

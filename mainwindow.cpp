@@ -199,6 +199,7 @@ void MainWindow::on_OpenFile_clicked()
                     ui->tableWidget->setItem(i, j, itm);
                 }
         }
+        ChangeExpressions();
     }
 }
 

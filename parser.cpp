@@ -3,52 +3,73 @@
 #include <sstream>
 #include<iomanip>
 
-
+string getItemCoordinates(QTableWidgetItem* item) {
+    string result;
+    char letter = item->column()+ 65;
+    char digit = item->row() + 48;
+    result+=letter;
+    result+=digit;
+    return result;
+}
+int hashOfString(string cellCoordinate) {
+    int MOD = 97;
+    int p = 7;
+    return (int)(pow(cellCoordinate[0], p) + pow(cellCoordinate[1], p)) % MOD;
+}
 double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
     std::cerr << "rec started\n";
-    if(number_of_iterations > 100){
-        std::cerr << "Wow! Infinite recursion\n";
-        return CODE_NUMBER_FOR_BAD_EXPRESSION;
-    }
     if(item->text() == " "){
         return CODE_NUMBER_FOR_BAD_EXPRESSION;
     }
+
+
+    //e.g A2,B4
+    string thisCellCoordinate = getItemCoordinates(item);
+
     number_of_iterations++;
     QString line = item->text();
-    cerr << "line from cell: " << line.toStdString() << '\n';
+
     string line_str = line.toStdString();
     string result;
-    //std::cerr << "\nline_str " << line_str << "\n";
 
     for(int i = 0; i < line_str.length(); i++)
     {
-       // std::cerr << "cycle started\n";
-//        if(line_str[i] == ' ')
-//        {
-//            i--;
-//        }
         if((int)line_str[i] >= 65 && (int)line_str[i] <=71)
         {
-          //  std::cerr << "we are herre!\n";
+
             int column_of_ref = (int)line_str[i]-65;
 
             string row;
             row +=line_str[i+1];
             int row_of_ref =0;
-            try
-            {
-                row_of_ref= stoi(row) -1;
-                if(row_of_ref >= table->rowCount()){
-                    throw std::invalid_argument("Out of range");
-                }
+            row_of_ref= stoi(row) -1;
+
+            cerr << line_str[i] << " " << row << '\n';
+
+            //e.g A2, B4
+            string refCellCoordinates = line_str[i]+row;
+
+            if(entranceTable[hash<string>{}(thisCellCoordinate)%100][hash<string>{}(refCellCoordinates)%100] == true) {
+                return CODE_NUMBER_FOR_CYCLE;
             }
-            catch(invalid_argument)
-            {
-                std::cerr<<"Invalid argument\n";
-                QMessageBox::critical(table, "Error", "Invalid Argument");
+
+
+            entranceTable[hash<string>{}(thisCellCoordinate)%100][hash<string>{}(refCellCoordinates)%100] = true;
+
+            if(row_of_ref >= table->rowCount()){
+                return CODE_NUMBER_FOR_BAD_EXPRESSION;
             }
+
             QTableWidgetItem* ref_item = table->item(row_of_ref, column_of_ref);
+
+
             double value_of_ref = RecursiveRef(ref_item, table, number_of_iterations);
+
+            if(value_of_ref == CODE_NUMBER_FOR_CYCLE){
+                return CODE_NUMBER_FOR_CYCLE;
+            }
+
+
             if(value_of_ref == CODE_NUMBER_FOR_BAD_EXPRESSION){
                 return CODE_NUMBER_FOR_BAD_EXPRESSION;
             }
@@ -57,15 +78,11 @@ double Parser::RecursiveRef(QTableWidgetItem* item, QTableWidget* table,int& num
         }
         else
         {
-            //std::cerr << "else\n";
             result+= line_str[i];
         }
     }
-   // std::cerr << "Result to calculate: " << result;
 
     double calculatedExpression = calculateExpression(result);
-    cerr << "calculateExpression = " << fixed << setprecision(2) << calculatedExpression;
-    cerr << '\n';
     return calculatedExpression;
 }
 
@@ -81,14 +98,6 @@ bool Parser::isInteger(const std::string & s)
    i >> result;
 
    return !i.fail() && i.eof();
-//    if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))) return false;
-
-
-//    char * p;
-//    strtod(s.c_str(), &p);
-
-//    if(*p == 0) cerr << s << "is double\n";
-//    return (*p == 0);
 }
 
 bool Parser::isDigit(char a) {
@@ -292,4 +301,12 @@ double Parser::calculateExpression(const string& inputExpression) {
         }
     }
     return numbersStack.back();
+}
+
+void Parser:: clearEntranceTable() {
+    for(int i = 0; i < 100; i++) {
+        for(int j = 0; j < 100; j++) {
+            entranceTable[i][j] = false;
+        }
+    }
 }

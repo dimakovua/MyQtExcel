@@ -55,7 +55,7 @@ double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTab
 
             entranceTable[hash<string>{}(thisCellCoordinate)%100][hash<string>{}(refCellCoordinates)%100] = true;
 
-            if(row_of_ref >= table->rowCount()){
+            if(row_of_ref >= table->rowCount() || row_of_ref < 0){
                 return CODE_NUMBER_FOR_BAD_EXPRESSION;
             }
 

@@ -82,6 +82,7 @@ double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTab
     }
 
     double calculatedExpression = calculateExpression(result);
+    item->setText(QString::number(calculatedExpression));
     return calculatedExpression;
 }
 

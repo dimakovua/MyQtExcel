@@ -7,7 +7,7 @@
 #include <vector>
 #include  <random>
 #include  <iterator>
-
+#include <QStringList>
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
     std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
@@ -93,6 +93,7 @@ void MainWindow::ChangeExpressions(){
         }
     }
 }
+
 void MainWindow::on_CalculateButton_clicked()
 {
     changed_by_hands.first = -1;
@@ -231,5 +232,44 @@ void MainWindow::on_lineEdit_textEdited(const QString &arg1)
     changed_by_hands.first = ui->tableWidget->currentItem()->row();
     changed_by_hands.second = ui->tableWidget->currentItem()->column();
     UpdateText(changed_by_hands.first, changed_by_hands.second);
+}
+
+
+void MainWindow::on_actionAdd_row_2_triggered()
+{
+    if(ui->tableWidget->rowCount()==9){
+        QMessageBox::critical(this, "Error!","Unable to add row!");
+    }
+    else{
+    ui->tableWidget->insertRow(1);
+    std::cout << "done!" << std::endl;
+    ui->tableWidget->setVerticalHeaderLabels(QStringList() << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10");
+    //this->ChangeExpressions();
+    }
+}
+
+
+
+void MainWindow::on_actionAdd_column_2_triggered()
+{
+    ui->tableWidget->insertColumn(1);
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H" << "I");
+    //this->ChangeExpressions();
+}
+
+
+void MainWindow::on_actionRemove_row_triggered()
+{
+    ui->tableWidget->removeRow(1);
+    ui->tableWidget->setVerticalHeaderLabels(QStringList() << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9");
+    //this->ChangeExpressions();
+}
+
+
+void MainWindow::on_actionRemove_column_triggered()
+{
+    ui->tableWidget->removeColumn(1);
+    ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H" << "I");
+    //this->ChangeExpressions();
 }
 

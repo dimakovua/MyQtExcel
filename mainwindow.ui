@@ -315,7 +315,7 @@ QPushButton:default {
      <x>0</x>
      <y>0</y>
      <width>737</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -323,6 +323,10 @@ QPushButton:default {
      <string>File</string>
     </property>
     <addaction name="actionQuit"/>
+    <addaction name="actionAdd_row_2"/>
+    <addaction name="actionAdd_column_2"/>
+    <addaction name="actionRemove_row"/>
+    <addaction name="actionRemove_column"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -362,6 +366,26 @@ QPushButton:default {
   <action name="actionOpen_helper">
    <property name="text">
     <string>Open helper</string>
+   </property>
+  </action>
+  <action name="actionAdd_row_2">
+   <property name="text">
+    <string>Add row</string>
+   </property>
+  </action>
+  <action name="actionAdd_column_2">
+   <property name="text">
+    <string>Add column</string>
+   </property>
+  </action>
+  <action name="actionRemove_row">
+   <property name="text">
+    <string>Remove row</string>
+   </property>
+  </action>
+  <action name="actionRemove_column">
+   <property name="text">
+    <string>Remove column</string>
    </property>
   </action>
  </widget>

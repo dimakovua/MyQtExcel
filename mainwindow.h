@@ -42,6 +42,14 @@ private slots:
     void on_tableWidget_cellPressed(int row, int column);
 
     void on_lineEdit_textEdited(const QString &arg1);
+    void on_actionAdd_row_2_triggered();
+
+    void on_actionAdd_column_2_triggered();
+
+    void on_actionRemove_row_triggered();
+
+    void on_actionRemove_column_triggered();
+
 private:
     void CleanTable();
     void ShowText(int row, int column);

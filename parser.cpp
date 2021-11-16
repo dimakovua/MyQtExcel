@@ -82,9 +82,9 @@ double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTab
     }
 
     double calculatedExpression = calculateExpression(result);
-    if(calculatedExpression != CODE_NUMBER_FOR_BAD_EXPRESSION && calculatedExpression != CODE_NUMBER_FOR_CYCLE){
-        item->setText(QString::number(calculatedExpression));
-    }
+    //if(calculatedExpression != CODE_NUMBER_FOR_BAD_EXPRESSION && calculatedExpression != CODE_NUMBER_FOR_CYCLE){
+        //item->setText(QString::number(calculatedExpression));
+    //}
     return calculatedExpression;
 }
 

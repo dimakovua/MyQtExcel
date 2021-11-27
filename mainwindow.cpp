@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <filesystem>
 #include  <random>
 #include  <iterator>
 #include <QStringList>
@@ -26,13 +27,17 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->tableWidget->blockSignals(1);
+    std::cerr <<"signals in constructor are blocked!" << std::endl;
     for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
             for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
                 QTableWidgetItem* itm = new QTableWidgetItem(" ");
                 ui->tableWidget->setItem(i, j, itm);
             }
     }
+    std::cerr << "cycle is done!" << std::endl;
     ChangeExpressions();
+    std::cerr << "Change expr is done!" << std::endl;
     QLabel label;
     QPixmap pix("/Users/dmitrikovalenko/MyExcel/Pics/dog.png");
     QPixmap pix2("/Users/dmitrikovalenko/MyExcel/Pics/frog.png");
@@ -44,13 +49,13 @@ MainWindow::MainWindow(QWidget *parent)
     QTableWidgetItem* cur = ui->tableWidget->item(0,0);
     ui->tableWidget->setCurrentItem(cur);
     //std::cout << "Constructor done";
+    ui->tableWidget->blockSignals(0);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
 
 void MainWindow::on_actionOpen_helper_triggered()
 {
@@ -67,21 +72,14 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_tableWidget_cellChanged(int row, int column)
 {
-    if(is_double_clicked){
         UpdateText(row, column);
-        //is_double_clicked = 0;
-    }
-    //ChangeExpressions();
 }
+
 void MainWindow::UpdateText(int row, int column){
-    if(row == changed_by_hands.first && column == changed_by_hands.second){
-       // std::cout << "UpdateText! " << changed_by_hands.first << " " << changed_by_hands.second << "\n";
-        expressions[row][column] = ui->tableWidget->item(row, column)->text();
-        changed_by_hands.first = -1;
-        changed_by_hands.second = -1;
-    }
+   expressions[row][column] = ui->tableWidget->item(row, column)->text();
 }
 void MainWindow::ChangeExpressions(){
+    QString space = " ";
     std::cout <<"Change Expression!\n";
     int i = ui->tableWidget->rowCount();
     int j = ui->tableWidget->columnCount();
@@ -89,13 +87,22 @@ void MainWindow::ChangeExpressions(){
     expressions.resize(i, vector<QString>(j));
     for(int a = 0; a < i; a++){
         for(int b = 0; b < j; b++){
-            expressions[a][b] = ui->tableWidget->item(a, b)->text();
+            if(ui->tableWidget->item(a,b)->text() != space){
+                expressions[a][b] = ui->tableWidget->item(a, b)->text();
+                std::cout << expressions[a][b].toStdString() << " ";
+            }
+            else{
+                expressions[a][b] = "0";
+                std::cout << expressions[a][b].toStdString() << " ";
+            }
         }
+        std::cout << std::endl;
     }
 }
 
 void MainWindow::on_CalculateButton_clicked()
 {
+    ui->tableWidget->blockSignals(1);
     changed_by_hands.first = -1;
     changed_by_hands.second = -1;
     changePic();
@@ -106,6 +113,7 @@ void MainWindow::on_CalculateButton_clicked()
 
     p.clearEntranceTable();
     double res = p.RecursiveRef(this, item, ui->tableWidget, n);
+   // p.Printtable();
     cerr << fixed << res << '\n';
     if(res == CODE_NUMBER_FOR_CYCLE) {
         QMessageBox::critical(this, "Error!", "Cycle!");
@@ -114,11 +122,16 @@ void MainWindow::on_CalculateButton_clicked()
     {
         QMessageBox::critical(this, "Error!", "Bad expression!");
     }
+    else if(res == CODE_NUMBER_FOR_MY_STICK)
+    {
+        QMessageBox::critical(this, "Error!", "Please! Don't use \'|\', because I use it for saving files)");
+    }
     else
     {
         QString answer = QString::number(res);
         item->setText(answer);
     }
+    ui->tableWidget->blockSignals(0);
 }
 void MainWindow::CleanTable(){
     for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
@@ -145,9 +158,22 @@ void MainWindow::on_SaveFile_clicked()
     if(out.is_open()){
         std::cerr << "ABOBA";
     }
+    string line;
+    bool bad = 0;
     for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
+        if(bad){break;}
             for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
-                std::cerr << ui->tableWidget->item(i, j)->text().toStdString() << "|";
+                line = ui->tableWidget->item(i, j)->text().toStdString();
+                if(line.find('|') != string::npos){
+                    QMessageBox::critical(this, "Error!", "Please! Don't use \'|\', because I use it for saving files)");
+                    out.clear();
+                    bad = 1;
+                    out.close();
+                    out.open(file_path);
+                    out.close();
+                    break;
+                }
+                std::cerr << line << "|";
                 //out << ui->tableWidget->item(i, j)->text().toStdString() << "|";
                 out << expressions[i][j].toStdString() << "|";
             }
@@ -177,30 +203,35 @@ void MainWindow::on_OpenFile_clicked()
     }
     else{
         getline(in, data);
-        //std::cerr << data;
-        vector<string> data_splitted;
-        string word;
-        for(int i =0; i < data.length(); i++){
-            if(data[i] != '|'){
-                word+=data[i];
-            }
-            else{
-                data_splitted.push_back(word);
-                word = "";
-            }
+        if(data.length() == 0){
+            QMessageBox::critical(this, "Error!", "Empty file! Did you try to save table with \'|\'?");
         }
-        int d = 0;
-//        for(auto aa : data_splitted){
-//            std::cerr << aa;
-//        }
-        for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
-                for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
-                    QTableWidgetItem* itm = new QTableWidgetItem(QString::fromStdString(data_splitted[d]));
-                    d++;
-                    ui->tableWidget->setItem(i, j, itm);
+        else{
+            //std::cerr << data;
+            vector<string> data_splitted;
+            string word;
+            for(int i =0; i < data.length(); i++){
+                if(data[i] != '|'){
+                    word+=data[i];
                 }
+                else{
+                    data_splitted.push_back(word);
+                    word = "";
+                }
+            }
+            int d = 0;
+    //        for(auto aa : data_splitted){
+    //            std::cerr << aa;
+    //        }
+            for (int i = 0; i< ui->tableWidget->rowCount() ; i++ ) {
+                    for(int j  = 0; j < ui->tableWidget->columnCount(); j++){
+                        QTableWidgetItem* itm = new QTableWidgetItem(QString::fromStdString(data_splitted[d]));
+                        d++;
+                        ui->tableWidget->setItem(i, j, itm);
+                    }
+            }
+            ChangeExpressions();
         }
-        ChangeExpressions();
     }
 }
 
@@ -214,17 +245,6 @@ void MainWindow::on_tableWidget_currentCellChanged(int currentRow, int currentCo
 void MainWindow::ShowText(int row, int column){
     ui->lineEdit->setText(expressions[row][column]);
 }
-
-
-void MainWindow::on_tableWidget_cellPressed(int row, int column)
-{
-    is_double_clicked = 1;
-    changed_by_hands.first = row;
-    changed_by_hands.second = column;
-    //std::cout << "Is double clicked\n";
-    //std::cout << "Double clicked on " << changed_by_hands.first << " " << changed_by_hands.second << std::endl;
-}
-
 
 void MainWindow::on_lineEdit_textEdited(const QString &arg1)
 {
@@ -252,9 +272,14 @@ void MainWindow::on_actionAdd_row_2_triggered()
 
 void MainWindow::on_actionAdd_column_2_triggered()
 {
-    ui->tableWidget->insertColumn(1);
-    ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H" << "I");
-    //this->ChangeExpressions();
+    if(ui->tableWidget->columnCount()==9){
+        QMessageBox::critical(this, "Error!","Unable to add column!");
+    }
+    else{
+        ui->tableWidget->insertColumn(1);
+        ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H" << "I");
+        //this->ChangeExpressions();
+    }
 }
 
 
@@ -272,4 +297,5 @@ void MainWindow::on_actionRemove_column_triggered()
     ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "A" << "B" << "C" << "D" << "E" << "F" << "G" << "H" << "I");
     //this->ChangeExpressions();
 }
+
 

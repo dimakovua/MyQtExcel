@@ -15,12 +15,13 @@
 
 #define CODE_NUMBER_FOR_BAD_EXPRESSION -2147483648.0
 #define CODE_NUMBER_FOR_CYCLE -2147483647.0
-
+#define CODE_NUMBER_FOR_MY_STICK -2147483646.0
 
 using namespace std;
 class Parser {
 public:
     double RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations);
+    void Printtable();
     bool isInteger(const std::string & s);
     bool isDigit(char a);
     bool isOperation(const string& s);

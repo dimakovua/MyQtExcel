@@ -2,9 +2,11 @@
 #define MAINWINDOW_H
 #include <QMainWindow>
 #include <QTabWidget>
+#include <QTableWidgetItem>
 #include <vector>
 #include <QPixmap>
 #include <utility>
+#include <QKeyEvent>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -39,10 +41,25 @@ private slots:
 
     void on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
 
-    void on_tableWidget_cellPressed(int row, int column);
+    //void on_tableWidget_cellPressed(int row, int column);
 
     void on_lineEdit_textEdited(const QString &arg1);
+    void on_actionAdd_row_2_triggered();
+
+    void on_actionAdd_column_2_triggered();
+
+    void on_actionRemove_row_triggered();
+
+    void on_actionRemove_column_triggered();
+
+    //void on_tableWidget_itemSelectionChanged();
+
+   // void on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
+
+   // void on_tableWidget_cellEntered(int row, int column);
+
 private:
+    //void keyPressEvent(QKeyEvent *event) override;
     void CleanTable();
     void ShowText(int row, int column);
     void UpdateText(int row, int column);
@@ -53,5 +70,6 @@ private:
     Ui::MainWindow *ui;
     std::pair<int, int> changed_by_hands;
     bool is_double_clicked = 0;
+    bool by_system_change = 1;
 };
 #endif // MAINWINDOW_H

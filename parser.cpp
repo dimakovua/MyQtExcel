@@ -4,9 +4,11 @@
 #include<iomanip>
 #include<mainwindow.h>
 string getItemCoordinates(QTableWidgetItem* item) {
+    int magic_f = 65;
+    int magic_s = 48;
     string result;
-    char letter = item->column()+ 65;
-    char digit = item->row() + 48;
+    char letter = item->column()+ magic_f;
+    char digit = item->row() + magic_s;
     result+=letter;
     result+=digit;
     return result;
@@ -18,11 +20,18 @@ int hashOfString(string cellCoordinate) {
 }
 double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTableWidget* table,int& number_of_iterations){
     std::cerr << "rec started\n";
-    if(item->text() == " "){
+    if( MainWindow->GetExpr(item->row(), item->column()) == "0"){
+        return 0;
+    }
+    else if(item->text() == " "){
         return CODE_NUMBER_FOR_BAD_EXPRESSION;
     }
+    else if(item->text().toStdString().find('|') != string::npos){
+        return CODE_NUMBER_FOR_MY_STICK;
+    }
 
-
+    int first_magic = 65;
+    int second_magic = 71;
     //e.g A2,B4
     string thisCellCoordinate = getItemCoordinates(item);
 
@@ -30,13 +39,12 @@ double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTab
     QString line = MainWindow->GetExpr(item->row(), item->column());
     string line_str = line.toStdString();
     string result;
-
     for(int i = 0; i < line_str.length(); i++)
     {
-        if((int)line_str[i] >= 65 && (int)line_str[i] <=71)
+        if((int)line_str[i] >= first_magic && (int)line_str[i] <=second_magic)
         {
 
-            int column_of_ref = (int)line_str[i]-65;
+            int column_of_ref = (int)line_str[i]-first_magic;
 
             string row;
             row +=line_str[i+1];
@@ -72,6 +80,9 @@ double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTab
             if(value_of_ref == CODE_NUMBER_FOR_BAD_EXPRESSION){
                 return CODE_NUMBER_FOR_BAD_EXPRESSION;
             }
+            if(value_of_ref == CODE_NUMBER_FOR_MY_STICK){
+                return CODE_NUMBER_FOR_MY_STICK;
+            }
             result+=to_string(value_of_ref);
             i++;
         }
@@ -82,7 +93,7 @@ double Parser::RecursiveRef(MainWindow* MainWindow, QTableWidgetItem* item, QTab
     }
 
     double calculatedExpression = calculateExpression(result);
-    if(calculatedExpression != CODE_NUMBER_FOR_BAD_EXPRESSION && calculatedExpression != CODE_NUMBER_FOR_CYCLE){
+    if(calculatedExpression != CODE_NUMBER_FOR_BAD_EXPRESSION && calculatedExpression != CODE_NUMBER_FOR_CYCLE && calculatedExpression != CODE_NUMBER_FOR_MY_STICK){
         item->setText(QString::number(calculatedExpression));
     }
     return calculatedExpression;
@@ -310,5 +321,13 @@ void Parser:: clearEntranceTable() {
         for(int j = 0; j < 100; j++) {
             entranceTable[i][j] = false;
         }
+    }
+}
+void Parser:: Printtable() {
+    for(int i = 0; i < 100; i++) {
+        for(int j = 0; j < 100; j++) {
+           std::cout << entranceTable[i][j] << " ";
+        }
+        std::cout << std::endl;
     }
 }

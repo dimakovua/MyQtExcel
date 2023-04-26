@@ -9,6 +9,7 @@ class MathUtilsTester : public QObject
 {
     Q_OBJECT
 private slots:
+    void testOperators_data();
     void testOperators();
 private:
     Parser m_parser;

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "test_runner.h"
 #include "parser.h"
+#include "qtests.h"
 #include <QApplication>
 void TestOperatorsPlus(){
     Parser p;
@@ -69,6 +70,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     TestAll();
+    MathUtilsTester m;
+    QTest::qExec(&m);
     w.show();
     return a.exec();
 }

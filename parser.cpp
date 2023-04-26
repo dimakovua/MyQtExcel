@@ -1,8 +1,9 @@
 #include "parser.h"
 #include <iostream>
 #include <sstream>
-#include<iomanip>
-#include<mainwindow.h>
+#include <iomanip>
+#include <mainwindow.h>
+
 string getItemCoordinates(QTableWidgetItem* item) {
     int magic_f = 65;
     int magic_s = 48;
